@@ -3,7 +3,10 @@ package com.example.pdfconverter.Screen
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +50,11 @@ fun Home() {
 
     val context = LocalContext.current
     val activity = (LocalContext.current as? Activity)
+    val result = remember { mutableStateOf<Uri?>(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        result.value = it
+    }
+
     Box{
         AppBar()
         Column(
@@ -57,7 +67,10 @@ fun Home() {
                .width(200.dp)
                .clickable {
                    if (checkPermissions(context)) {
-                       Toast.makeText(context, "Permissions Granted..", Toast.LENGTH_SHORT).show()
+                       Toast
+                           .makeText(context, "Permissions Granted..", Toast.LENGTH_SHORT)
+                           .show()
+                       launcher.launch(arrayOf("application/pdf"))
                    } else {
                        requestPermission(activity!!)
                    }
@@ -69,6 +82,10 @@ fun Home() {
             Spacer(modifier = Modifier.height(10.dp))
             Text(text = "Select Files", textAlign = TextAlign.Center, fontSize = 20.sp, fontWeight = FontWeight.W400)
             Spacer(modifier = Modifier.height(20.dp))
+
+            result.value?.let { image ->
+                Text("Document path:  " +image.path.toString())
+            }
             Button(onClick = { /*TODO*/ },
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(

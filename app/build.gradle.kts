@@ -42,7 +42,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "2.1.0"
     }
     packaging {
         resources {
@@ -55,6 +55,9 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.coil.compose)
+    implementation(libs.pdfbox.android)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
