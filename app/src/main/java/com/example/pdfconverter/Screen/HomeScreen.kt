@@ -3,7 +3,9 @@ package com.example.pdfconverter.Screen
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,20 +41,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.navigation.NavHostController
 import com.example.pdfconverter.Components.AppBar
+import com.example.pdfconverter.Components.End
+
 import com.example.pdfconverter.Permissions.checkPermissions
 import com.example.pdfconverter.Permissions.requestPermission
 import com.example.pdfconverter.R
+import java.io.File
 
 @SuppressLint("ContextCastToActivity")
 @Composable
-fun Home() {
+fun Home(navController : NavHostController) {
 
     val context = LocalContext.current
     val activity = (LocalContext.current as? Activity)
     val result = remember { mutableStateOf<Uri?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
-        result.value = it
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
+        result.value = it[0]
     }
 
     Box{
@@ -70,7 +77,7 @@ fun Home() {
                        Toast
                            .makeText(context, "Permissions Granted..", Toast.LENGTH_SHORT)
                            .show()
-                       launcher.launch(arrayOf("application/pdf"))
+                       launcher.launch(arrayOf("*/*"))
                    } else {
                        requestPermission(activity!!)
                    }
@@ -83,23 +90,18 @@ fun Home() {
             Text(text = "Select Files", textAlign = TextAlign.Center, fontSize = 20.sp, fontWeight = FontWeight.W400)
             Spacer(modifier = Modifier.height(20.dp))
 
-            result.value?.let { image ->
-                Text("Document path:  " +image.path.toString())
-            }
-            Button(onClick = { /*TODO*/ },
+           result?.value?.path?.let {
+               Text(text = File(it).name)
+           }
+
+            Button(onClick = { navController.navigate(End) },
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
                     contentColor = Color.White
                 )) {
-               Text(text = "Convert to Pdf", fontSize = 30.sp, fontWeight = FontWeight.W600)
+               Text(text =  "View Document", fontSize = 30.sp, fontWeight = FontWeight.W600)
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomePreview(){
-    Home()
 }
